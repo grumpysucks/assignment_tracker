@@ -1,6 +1,5 @@
 import datetime
-
-
+import json
 
 class Assignment:
     def __init__(self, name, due_date, priority):
@@ -28,7 +27,19 @@ def view_assignments(student_assignments):
     return a
 
 assignments = []
+try:
+    with open('data.json', 'r') as f:
+        data = json.load(f)
+    for d in data:
+        a = Assignment(d['name'], d['due_date'], d['priority'])
+        a.status = d['status']
+        a.time_status = d['time_status']
+        assignments.append(a)
+except (FileNotFoundError, json.decoder.JSONDecodeError):
+    pass
+
 while True:
+
     current_date = datetime.date.today().strftime("%m/%d/%Y")
     print("1. Add Assignment\n2. View Assignments\n3. Mark Complete\n4. Exit")
     try:
@@ -64,6 +75,8 @@ while True:
             else:
                 print('Assignment not found')
         elif choice == 4:
+            with open('data.json', 'w') as f:
+                json.dump([a.__dict__ for a in assignments], f)
             break
 
 
