@@ -3,25 +3,26 @@ import json
 import math
 from assignment import Assignment
 import time
-
-starting_time = time.time()
+json_data = '../data/data.json'
 
 def process_data():
     try:
-        with open('../data/data.json', 'r') as f:
+        with open(json_data, 'r') as f:
             data = json.load(f)
-            for key in data:
-                a = Assignment(key['name'], key['due_date'], key['priority'])
-                a.status = key['status']
-                a.time_status = key['time_status']
-                assignments.append(a)
+            if data:
+                for key in data:
+                    a = Assignment(key['name'], key['due_date'], key['priority'])
+                    a.status = key['status']
+                    a.time_status = key['time_status']
+                    assignments.append(a)
             return True
     except (FileNotFoundError, json.decoder.JSONDecodeError):
         pass
 
 def save_data():
-    with open('../data/data.json', 'w') as f:
-        json.dump([a.__dict__ for a in assignments], f)
+    with open(json_data, 'w') as f:
+        json.dump([a.__dict__ for a in assignments] if assignments else [], f, indent = 2)
+
 
 def view_assignments(student_assignments):
     a = "=== Your Assignments ===\n"
@@ -52,14 +53,14 @@ assignments = []
 process_data()
 
 while True:
-    current_date = datetime.date.today().strftime("%m/%d/%Y")
-    print("1. Add Assignment\n2. View Assignments\n3. Mark Complete\n4. Statistics\n5. Exit")
+    current_date = datetime.date.today()
+    print("1. Add Assignment\n2. View Assignments\n3. Mark Complete\n4. Statistics\n5. Clear Assignments\n6. Exit")
     try:
         choice = int(input("Enter your choice(1-5)-> "))
     except ValueError:
         print("Please enter a valid choice(number)")
     else:
-        while choice not in [1,2,3,4,5]:
+        while choice not in [i+1 for i in range(6)]:
             try:
                 choice = int(input("Please choose from (1-5)-> "))
             except ValueError:
@@ -70,6 +71,22 @@ while True:
             while len(due_date) != 10 or "/" not in due_date or not due_date.replace('/', '').isdigit():
                 print("Length of date must be 10 characters include slashes and must be in number form")
                 due_date = input("Due Date(MM/DD/YYYY)-> ")
+            due_date = datetime.datetime.strptime(due_date, "%m/%d/%Y").date()
+            while due_date < current_date:
+                print("Warning! This assignment is already past due date!")
+                answer = input("Are you sure you would like to add assignment?(y/n)-> ")
+                while answer.lower() not in ['y', 'yes','n', 'no']:
+                    print("Please enter yes, y, n, or no")
+                    answer = input("Are you sure you would like to add assignment?(y/n)-> ")
+                if answer.lower() in ['y', 'yes']:
+                    break
+                else:
+                    due_date = input("Due Date(MM/DD/YYYY)-> ")
+                    while len(due_date) != 10 or "/" not in due_date or not due_date.replace('/', '').isdigit():
+                        print("Length of date must be 10 characters include slashes and must be in number form")
+                        due_date = input("Due Date(MM/DD/YYYY)-> ")
+                    due_date = datetime.datetime.strptime(due_date, "%m/%d/%Y")
+            due_date = datetime.datetime.strftime(due_date, "%m/%d/%Y")
             priority = input("Priority(low, medium, high)-> ")
             while priority.lower() not in ["low", "medium", "high"]:
                 print("Priority must be low, medium, or high")
@@ -89,11 +106,14 @@ while True:
                 print('Assignment not found')
         elif choice == 4:
             completed = len([a for a in assignments if a.status])
-            print(f"Total Assignments: {len(assignments)}\nCompleted: {completed}\nIncomplete: {len(assignments) - completed}\nCompletion Rate: {math.floor((completed/len(assignments))*100)}%")
+            completion_rate = math.floor((completed / len(assignments)) * 100) if assignments else 0
+            print(f"Total Assignments: {len(assignments)}\nCompleted: {completed}\nIncomplete: {len(assignments) - completed}\nCompletion Rate: {completion_rate}%")
         elif choice == 5:
+            assignments = []
+            save_data()
+        elif choice == 6:
             print("Saving data...")
             print("Exiting...")
             save_data()
             break
 
-print(time.time()-starting_time)
