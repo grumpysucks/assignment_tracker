@@ -1,11 +1,1 @@
-[
-  {
-    "name": "celebrate birthday",
-    "subject": "life",
-    "due_date": "09/19/2026",
-    "time_status": "Due in 92d",
-    "status": false,
-    "priority": "High",
-    "notes": "great day for testing code"
-  }
-]
+[]

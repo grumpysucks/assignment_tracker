@@ -169,7 +169,6 @@ class AssignmentPopUp(tk.Toplevel):
             self.on_save()
         self.destroy()
 
-
 class AssignmentCard(tk.Frame):
     def __init__(self, master, assignment, on_toggle, on_edit, on_delete):
         super().__init__(master, bg=C["surface"])
@@ -238,7 +237,6 @@ class AssignmentCard(tk.Frame):
                      padx=8, pady=3, font=FONT_SMALL).pack(side="left")
 
         tk.Frame(self, bg=C["border"], height=1).pack(side="bottom", fill="x")
-
 
 class App(tk.Tk):
     def __init__(self):
